@@ -13,7 +13,7 @@ The documentation provides details on interacting with the Droptime API, includi
     - [get_or_update_session()](#2-get_or_update_session)
     - [make_api_call()](#3-make_api_call)
     - [reformat_dispatch()](#4-reformat_dispatch)
-    - [fetch_and_reformat()](#5-fetch_and_reformat)
+    - [get_data()](#5-fetch_and_reformat)
     - [summarize_results()](#6-summarize_results)
  
 
@@ -90,8 +90,8 @@ python script_name.py 10-2-2023 10-7-2023 /path/to/your/config.yaml
 **Purpose:** Reformat a single dispatch data for improved readability.
 **Returns:** Dictionary with reformatted dispatch data.
 
-<a id="5-fetch_and_reformat"></a>
-### 5. fetch_and_reformat(start_date: str, end_date: str) -> list
+<a id="5-get_data"></a>
+### 5. get_data(start_date: str, end_date: str) -> list
 **Parameters:** 
 1. `start_date`: Start date string.
 2. `end_date`: End date string.
@@ -101,23 +101,33 @@ python script_name.py 10-2-2023 10-7-2023 /path/to/your/config.yaml
 ```json
 [
     {
-        "Plant": "Huntsville Asphalt",
-        "Time of Day": "Day",
-        "Customer": "S&W Construction",
-        "Paver": "62.101114 - Weiler",
-        "Job Scope": "Non Main Line",
-        ...
+       "Plant": "Huntsville Asphalt",
+       "Time of Day": "Day",
+       "Customer": "S&W Construction",
+       "Paver": "62.101114 - Weiler",
+       "Job Scope": "Non Main Line",
+       "Plant Load Out": "09:00:00",
+       "Mat Thickness": "3.5",
+       "Mat Width": "36.00",
+       "Paving Start": "09:150:00",
+       "crew": "Josh Allen",
+       "Job Name": "STPAA-HSIP-0010(561) BUTLER CO",
+       "Job Number": "393553",
+       "shiftid": 7952,
+       "startdatetime": "10/2/2023 5:00:00 AM",
+       "enddatetime": "10/2/2023 3:00:00 PM",
+       "dispatchnotes": "Milling out 3' shoulder and paving back 350 lbs",
         "lineitems": [
             {
                 "phase": "50.40102.2",
                 "phasedesc": "Superpave Base Layer 1`` Max Agg C/D",
                 "qty": 263.0,
                 "notes": ""
-            },
-            ...
+            }
+        
         ]
-    },
-    ...
+    }
+
 ]
 ```
 

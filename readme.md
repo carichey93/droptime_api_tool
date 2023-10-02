@@ -13,7 +13,7 @@ The documentation provides details on interacting with the Droptime API, includi
     - [get_or_update_session()](#2-get_or_update_session)
     - [make_api_call()](#3-make_api_call)
     - [reformat_dispatch()](#4-reformat_dispatch)
-    - [get_data()](#5-fetch_and_reformat)
+    - [get_data()](#5-get_data)
     - [summarize_results()](#6-summarize_results)
  
 

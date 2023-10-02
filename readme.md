@@ -101,18 +101,18 @@ python script_name.py 10-2-2023 10-7-2023 /path/to/your/config.yaml
 ```json
 [
     {
-        'Plant': 'Huntsville Asphalt',
-        'Time of Day': 'Day',
-        'Customer': 'S&W Construction',
-        'Paver': '62.101114 - Weiler',
-        'Job Scope': 'Non Main Line',
+        "Plant": "Huntsville Asphalt",
+        "Time of Day": "Day",
+        "Customer": "S&W Construction",
+        "Paver": "62.101114 - Weiler",
+        "Job Scope": "Non Main Line",
         ...
-        'lineitems': [
+        "lineitems": [
             {
-                'phase': '50.40102.2',
-                'phasedesc': 'Superpave Base Layer 1`` Max Agg C/D',
-                'qty': 263.0,
-                'notes': ''
+                "phase": "50.40102.2",
+                "phasedesc": "Superpave Base Layer 1`` Max Agg C/D",
+                "qty": 263.0,
+                "notes": ""
             },
             ...
         ]

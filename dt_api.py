@@ -177,12 +177,18 @@ def summarize_results(results: list):
 
         # Print each line item
         for lineitem in entry.get("lineitems", []):
+            # Set default value if value is None type
+            phase_value = lineitem.get("phase") or "N/A"
+            phase_desc_value = lineitem.get("phasedesc") or "N/A"
+            qty_value = lineitem.get("qty") or "N/A"
+            notes_value = lineitem.get("notes") or "N/A"
+
             print(
                 "{:<20} {:<50} {:<10} {:<30}".format(
-                    lineitem.get("phase", "N/A"),
-                    lineitem.get("phasedesc", "N/A"),
-                    lineitem.get("qty", "N/A"),
-                    lineitem.get("notes", "N/A"),
+                    phase_value,
+                    phase_desc_value,
+                    qty_value,
+                    notes_value
                 )
             )
 

@@ -31,6 +31,10 @@ def fetch_new_session(config_file: str) -> dict:
         raise ValueError(f"Unexpected API response: {data}")
     config.update(data["SessionInformation"])
 
+    # Save the updated configuration with the new session information back to the file
+    with open(config_file, "w") as file:
+        yaml.dump(config, file)
+
     return config
 
 
@@ -68,19 +72,24 @@ def make_api_call(method: str, params: dict, config_file: str) -> dict:
     response = requests.get(BASE_URL, params=params)
     response_data = response.json()
 
+    # Check for session expiration
     if (
-        response.status_code != 200
-        or response_data.get("ErrorMessage")
-        == "Your session has expired. Please login again."
+            response_data.get("ErrorCode") == '1'
+            and response_data.get("ErrorMessage") == "Your session has expired. Please login again."
     ):
+        print("Session has expired, refreshing...")
         new_session_data = fetch_new_session(config_file)
-        params.update(new_session_data)
+
+        # Update the parameters with new session details and make the API call again
+        params.update({
+            "SessionID": new_session_data["SessionID"],
+            "SP": new_session_data["SessionPassword"],
+        })
         response = requests.get(BASE_URL, params=params)
         response_data = response.json()
 
     response.raise_for_status()
     return response_data
-
 
 def reformat_dispatch(dispatch: dict) -> dict:
     """Applies formatting to a dispatch so that the results are more usable"""

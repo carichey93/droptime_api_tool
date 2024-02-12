@@ -177,7 +177,7 @@ def reformat_dispatch(dispatch: dict) -> dict:
     Returns:
     - A dictionary with the reformatted dispatch entry.
     """
-    print(dispatch)
+
     # Initialize reformatted with initial data, excluding 'fields' and 'lineitems'
     initial_keys = [
         "shiftid",
@@ -193,9 +193,9 @@ def reformat_dispatch(dispatch: dict) -> dict:
     # Process and reformat 'crew' if present
     crew_data = dispatch.get("crew", {})
     if (
-        isinstance(crew_data, dict)
-        and "firstname" in crew_data
-        and "lastname" in crew_data
+            isinstance(crew_data, dict)
+            and "firstname" in crew_data
+            and "lastname" in crew_data
     ):
         reformatted["crew"] = f"{crew_data['firstname']} {crew_data['lastname']}"
 
@@ -215,17 +215,33 @@ def reformat_dispatch(dispatch: dict) -> dict:
             reformatted[catname] = item_value
 
     # Process 'lineitems' to aggregate attributes into single strings separated by semicolons for multiple entries
-    lineitems_attributes = {"phase": [], "phasedesc": [], "qty": [], "notes": [], "mix": [], "job": []}
+    lineitems_attributes = {"phase": [], "phasedesc": [], "qty": [], "notes": [], "mix": [], "mixdesc": [], "job": []}
     for item in dispatch.get("lineitems", []):
         for key in lineitems_attributes.keys():
             if key in item and item[key] is not None:
-                lineitems_attributes[key].append(str(item[key]))
+                if key == "job":
+                    job_str = str(item[key]).strip("; ").strip()
+                    if job_str not in lineitems_attributes[key]:
+                        lineitems_attributes[key].append(job_str)
+                else:
+                    lineitems_attributes[key].append(str(item[key]))
 
     # Combine values for each attribute from all lineitems and assign to reformatted
     for key, values in lineitems_attributes.items():
         reformatted[key] = "; ".join(values)
 
+    # Calculate and add 'Material Tonnage' by summing all values in the 'qty' column
+    if "qty" in reformatted:
+        try:
+            # Convert each quantity to a float and sum them up
+            total_tonnage = sum(float(qty.strip()) for qty in reformatted["qty"].split(";") if qty.strip())
+        except ValueError:
+            # In case of any non-numeric values, set total tonnage to 0 or handle as needed
+            total_tonnage = 0
+        reformatted["Material Tonnage"] = total_tonnage
+
     return reformatted
+
 
 
 def summarize_results(results: list):

@@ -47,11 +47,14 @@ Configuration File (YAML Format)
 
 The module uses a YAML configuration file for setting API credentials and session details. Below is the required structure with descriptions for each field:
 
-vbnet
 
-Copy code
 
-`CompanyID: 'YourCompanyID' Manager: 'YourManagerCode' Passcode: 'YourPasscode' SessionID: 'OptionalInitialSessionID' SessionPassword: 'OptionalInitialSessionPassword' UserName: 'YourUsername'`
+CompanyID: 'YourCompanyID' 
+Manager: 'YourManagerCode' 
+Passcode: 'YourPasscode' 
+SessionID: 'OptionalInitialSessionID' 
+SessionPassword: 'OptionalInitialSessionPassword' 
+UserName: 'YourUsername'`
 
 Replace placeholder values with your actual Droptime API credentials.
 
@@ -60,20 +63,12 @@ Running the Script
 
 To execute the module, use the following command pattern:
 
-css
-
-Copy code
-
 `python script_name.py [start_date] [end_date] [config_file_path]`
 
 *   `start_date` and `end_date`: Specify the date range for data retrieval (format: MM-DD-YYYY).
 *   `config_file_path`: Path to your YAML configuration file.
 
 Example:
-
-lua
-
-Copy code
 
 `python droptime_api_module.py 10 -2 -2023 10 -7 -2023 /path/to/config.yaml`
 

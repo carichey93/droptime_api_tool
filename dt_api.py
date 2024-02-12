@@ -177,6 +177,7 @@ def reformat_dispatch(dispatch: dict) -> dict:
     Returns:
     - A dictionary with the reformatted dispatch entry.
     """
+    print(dispatch)
     # Initialize reformatted with initial data, excluding 'fields' and 'lineitems'
     initial_keys = [
         "shiftid",
@@ -214,7 +215,7 @@ def reformat_dispatch(dispatch: dict) -> dict:
             reformatted[catname] = item_value
 
     # Process 'lineitems' to aggregate attributes into single strings separated by semicolons for multiple entries
-    lineitems_attributes = {"phase": [], "phasedesc": [], "qty": [], "notes": []}
+    lineitems_attributes = {"phase": [], "phasedesc": [], "qty": [], "notes": [], "mix": [], "job": []}
     for item in dispatch.get("lineitems", []):
         for key in lineitems_attributes.keys():
             if key in item and item[key] is not None:

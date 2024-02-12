@@ -40,7 +40,9 @@ Before starting, ensure you have the following prerequisites installed:
 
 These dependencies can be installed using the following pip command:
 
-```pip install requests PyYAML ruamel.yaml```
+```
+pip install requests PyYAML ruamel.yaml
+```
 
 Configuration File (YAML Format)
 --------------------------------

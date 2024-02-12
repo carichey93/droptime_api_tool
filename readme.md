@@ -73,7 +73,7 @@ python script_name.py [start_date] [end_date] [config_file_path]
 Example:
 
 ```
-python droptime_api_module.py 10 -2 -2023 10 -7 -2023 /path/to/config.yaml
+python droptime_api_module.py 10-2-2023 10-7-2023 /path/to/config.yaml
 ```
 
 Functions

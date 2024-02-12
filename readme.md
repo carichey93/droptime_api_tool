@@ -157,7 +157,9 @@ Reformats a single dispatch entry, extracting details from `fields` and `lineite
 #### Example Usage
 
 ```
-for dispatch in dispatches:     reformatted_dispatch = reformat_dispatch(dispatch)     print(reformatted_dispatch)
+for dispatch in dispatches:
+   reformatted_dispatch = reformat_dispatch(dispatch)
+   print(reformatted_dispatch)
 ```
 
 ### 5\. get\_data()
@@ -179,7 +181,9 @@ Fetches and formats dispatch data for a specified date range from the Droptime A
 #### Example Usage
 
 ```
-formatted_data = get_data("2023-01-01", "2023-01-31", "path/to/config.yml") for item in formatted_data:     print(item)
+formatted_data = get_data("2023-01-01", "2023-01-31", "path/to/config.yml")
+for item in formatted_data:
+   print(item)
 ```
 
 ### 6\. summarize\_results()

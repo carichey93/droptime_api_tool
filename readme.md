@@ -21,6 +21,20 @@ The documentation provides details on interacting with the Droptime API, includi
 [Link to Additional Documentation](https://droptime.net/api/detail.php?token=eWFtbC9NaXNjL2ltcG9ydFZpZXdwb2ludEl0ZW1zLnlhbWw=)
 
 <a id="configuration-file-yaml-format"></a>
+
+## Prerequisites
+Before you begin, ensure you have the following installed:
+
+- Python 3.6 or later
+- **'requests'** library
+- **'PyYAML'** library
+- **'ruamel.yaml'** library
+
+These dependencies can be installed using pip:
+'''
+pip install requests PyYAML ruamel.yaml
+'''
+
 ## Configuration File (YAML format)
 
 The configuration file is crucial for the Droptime API. Structure it in the YAML format as follows:

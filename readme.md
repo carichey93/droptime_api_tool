@@ -47,14 +47,12 @@ Configuration File (YAML Format)
 
 The module uses a YAML configuration file for setting API credentials and session details. Below is the required structure with descriptions for each field:
 
-
-
-CompanyID: 'YourCompanyID' 
-Manager: 'YourManagerCode' 
-Passcode: 'YourPasscode' 
-SessionID: 'OptionalInitialSessionID' 
-SessionPassword: 'OptionalInitialSessionPassword' 
-UserName: 'YourUsername'`
+- **CompanyID**: 'YourCompanyID'
+- **Manager**: 'YourManagerCode'
+- **Passcode**: 'YourPasscode'
+- **SessionID**: 'OptionalInitialSessionID'
+- **SessionPassword**: 'OptionalInitialSessionPassword'
+- **UserName**: 'YourUsername'`
 
 Replace placeholder values with your actual Droptime API credentials.
 

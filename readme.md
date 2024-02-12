@@ -49,7 +49,12 @@ Configuration File (YAML Format)
 
 The module uses a YAML configuration file for setting API credentials and session details. Below is the required structure with descriptions for each field:
 
-`CompanyID: 'YourCompanyID' Manager: 'YourManagerCode' Passcode: 'YourPasscode' SessionID: 'OptionalInitialSessionID' SessionPassword: 'OptionalInitialSessionPassword' UserName: 'YourUsername'`
+- **CompanyID**: 'YourCompanyID'
+- **Manager**: 'YourManagerCode'
+- **Passcode**: 'YourPasscode'
+- **SessionID**: 'OptionalInitialSessionID'
+- **SessionPassword**: 'OptionalInitialSessionPassword'
+- **UserName**: 'YourUsername'`
 
 Replace placeholder values with your actual Droptime API credentials.
 
@@ -58,14 +63,18 @@ Running the Script
 
 To execute the module, use the following command pattern:
 
-```python script_name.py [start_date] [end_date] [config_file_path]```
+```
+python script_name.py [start_date] [end_date] [config_file_path]
+```
 
 *   `start_date` and `end_date`: Specify the date range for data retrieval (format: MM-DD-YYYY).
 *   `config_file_path`: Path to your YAML configuration file.
 
 Example:
 
-```python droptime_api_module.py 10 -2 -2023 10 -7 -2023 /path/to/config.yaml```
+```
+python droptime_api_module.py 10 -2 -2023 10 -7 -2023 /path/to/config.yaml
+```
 
 Functions
 ---------
@@ -104,7 +113,9 @@ Retrieves the current session details from the configuration file or fetches a n
 
 #### Example Usage
 
-```session_config = get_or_refresh_session("path/to/config.yml") print(session_config)```
+```
+session_config = get_or_refresh_session("path/to/config.yml") print(session_config)
+```
 
 ### 3\. make\_api\_call()
 
@@ -125,7 +136,9 @@ Makes a generic API call to the Droptime API with specified method and parameter
 
 #### Example Usage
 
-```api_response = make_api_call("getDispatchInfo", session_config, "2023-01-01", "2023-01-31") print(api_response)```
+```
+api_response = make_api_call("getDispatchInfo", session_config, "2023-01-01", "2023-01-31") print(api_response)
+```
 
 ### 4\. reformat\_dispatch()
 
@@ -143,7 +156,9 @@ Reformats a single dispatch entry, extracting details from `fields` and `lineite
 
 #### Example Usage
 
-```for dispatch in dispatches:     reformatted_dispatch = reformat_dispatch(dispatch)     print(reformatted_dispatch)```
+```
+for dispatch in dispatches:     reformatted_dispatch = reformat_dispatch(dispatch)     print(reformatted_dispatch)
+```
 
 ### 5\. get\_data()
 
@@ -163,7 +178,9 @@ Fetches and formats dispatch data for a specified date range from the Droptime A
 
 #### Example Usage
 
-`formatted_data = get_data("2023-01-01", "2023-01-31", "path/to/config.yml") for item in formatted_data:     print(item)`
+```
+formatted_data = get_data("2023-01-01", "2023-01-31", "path/to/config.yml") for item in formatted_data:     print(item)
+```
 
 ### 6\. summarize\_results()
 
@@ -177,6 +194,8 @@ Prints a summarized version of the formatted dispatch results to the console for
 
 #### Example Usage
 
-```summarize_results(formatted_data)```
+```
+summarize_results(formatted_data)
+```
 
 * * *

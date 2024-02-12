@@ -1,7 +1,3 @@
-To create a comprehensive and clear README for your GitHub repository that documents the Droptime API Interaction Module, including prerequisites and a detailed table of contents for better navigation, see the updated documentation below:
-
-* * *
-
 Droptime API Documentation
 ==========================
 

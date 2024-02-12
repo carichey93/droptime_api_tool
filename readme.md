@@ -31,9 +31,9 @@ Before you begin, ensure you have the following installed:
 - **'ruamel.yaml'** library
 
 These dependencies can be installed using pip:
-'''
+```
 pip install requests PyYAML ruamel.yaml
-'''
+```
 
 ## Configuration File (YAML format)
 

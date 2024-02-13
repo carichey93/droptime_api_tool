@@ -1,6 +1,10 @@
 import sys
+from datetime import datetime as dt, timedelta
+from pathlib import Path
+
 import requests
 import yaml
+from requests.exceptions import RequestException
 from ruamel.yaml import YAML
 
 """
@@ -53,30 +57,22 @@ def load_config(config_file: str) -> dict:
 
 def fetch_new_session(config: dict) -> dict:
     """
-    Fetch a new session from the Droptime API using the provided configuration,
-    ensuring only required fields are sent in the request.
-
-    Parameters:
-    - config: A dictionary containing the necessary configuration for the API call.
-
-    Returns:
-    - A dictionary containing the new session information.
+    Modified to handle connection errors and attempt to regenerate credentials.
     """
-    # Filter the config to include only the fields required for starting a new session
-    session_params = {key: config[key] for key in REQUIRED_FIELDS if key in config}
+    try:
+        session_params = {key: config[key] for key in REQUIRED_FIELDS if key in config}
+        session_params["Method"] = "StartAPISession"
+        response = requests.get(BASE_URL, params=session_params)
+        response.raise_for_status()  # Ensure the API call was successful
+        data = response.json()
 
-    # Specify the method for starting a new API session
-    session_params["Method"] = "StartAPISession"
+        if "SessionInformation" not in data:
+            raise ValueError(f"Unexpected API response: {data}")
 
-    response = requests.get(BASE_URL, params=session_params)
-    response.raise_for_status()  # Ensure the API call was successful
-    data = response.json()
-
-    if "SessionInformation" not in data:
-        raise ValueError(f"Unexpected API response: {data}")
-
-    # Return the session information part of the response
-    return data["SessionInformation"]
+        return data["SessionInformation"]
+    except Exception as e:
+        print(f"Connection error: {e}")
+        raise
 
 
 def update_config_file(config_file: str, updates: dict):
@@ -118,40 +114,58 @@ def get_or_refresh_session(config_file: str) -> dict:
     return config
 
 
-def make_api_call(method: str, config: dict, start_date: str, end_date: str) -> dict:
+def make_api_call(
+    method: str, start_date: str, end_date: str, config_file: str, attempt=1
+) -> dict:
     """
-    Make a generic API call, using only the required fields from the configuration.
+    Make a generic API call, using the configuration loaded from the specified file. If an error code indicates
+    that new credentials are needed, fetch a new session and retry.
 
     Parameters:
     - method: The API method to call.
-    - config: Configuration dictionary with all configuration details.
     - start_date: Start date for the data request.
     - end_date: End date for the data request.
+    - config_file: Path to the YAML configuration file where the API credentials and session details are stored.
+    - attempt: Current attempt number, used to prevent infinite recursion.
 
     Returns:
     - The JSON response from the API call.
     """
-    # Prepare the parameters for the API call
-    # Filter the config to include only required fields for the API call, plus any method-specific parameters
-    api_params = {key: config[key] for key in REQUIRED_FIELDS if key in config}
+    config = load_config(config_file)
 
-    # Add method-specific parameters
+    # Prepare the parameters for the API call
+    api_params = {key: config[key] for key in REQUIRED_FIELDS if key in config}
     api_params.update({"Method": method, "StartTime": start_date, "EndTime": end_date})
 
-    # Include session-specific parameters if available
     if "SessionID" in config and "SessionPassword" in config:
         api_params.update(
             {"SessionID": config["SessionID"], "SP": config["SessionPassword"]}
         )
 
-    response = requests.get(BASE_URL, params=api_params)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(BASE_URL, params=api_params)
+        response.raise_for_status()  # Ensure the API call was successful
+        data = response.json()
+
+        # Check for an error code in the response
+        if data.get("ErrorCode") == "1" and attempt <= 2:  # Prevents infinite recursion
+            print(
+                "Error code received indicating invalid credentials. Fetching new session..."
+            )
+            get_or_refresh_session(config_file)
+            # Retry the API call with new credentials
+            return make_api_call(method, start_date, end_date, config_file, attempt + 1)
+
+        return data
+    except RequestException as e:
+        print(f"API call failed due to connection error: {e}")
+        # In a real scenario, you might want to handle retries or log the error appropriately
+        raise
 
 
 def get_data(start_date: str, end_date: str, config_file: str) -> list:
     """
-    Fetch and format dispatch data for a specified date range.
+    Fetch and format dispatch data for a specified date range using the configuration from the given file.
 
     Parameters:
     - start_date: Start date for the dispatch data request.
@@ -161,8 +175,7 @@ def get_data(start_date: str, end_date: str, config_file: str) -> list:
     Returns:
     - A list of dictionaries containing formatted dispatch data.
     """
-    session_config = get_or_refresh_session(config_file)
-    data = make_api_call("getDispatchInfo", session_config, start_date, end_date)
+    data = make_api_call("getDispatchInfo", start_date, end_date, config_file)
     return [reformat_dispatch(dispatch) for dispatch in data.get("Items", [])]
 
 
@@ -193,9 +206,9 @@ def reformat_dispatch(dispatch: dict) -> dict:
     # Process and reformat 'crew' if present
     crew_data = dispatch.get("crew", {})
     if (
-            isinstance(crew_data, dict)
-            and "firstname" in crew_data
-            and "lastname" in crew_data
+        isinstance(crew_data, dict)
+        and "firstname" in crew_data
+        and "lastname" in crew_data
     ):
         reformatted["crew"] = f"{crew_data['firstname']} {crew_data['lastname']}"
 
@@ -215,7 +228,15 @@ def reformat_dispatch(dispatch: dict) -> dict:
             reformatted[catname] = item_value
 
     # Process 'lineitems' to aggregate attributes into single strings separated by semicolons for multiple entries
-    lineitems_attributes = {"phase": [], "phasedesc": [], "qty": [], "notes": [], "mix": [], "mixdesc": [], "job": []}
+    lineitems_attributes = {
+        "phase": [],
+        "phasedesc": [],
+        "qty": [],
+        "notes": [],
+        "mix": [],
+        "mixdesc": [],
+        "job": [],
+    }
     for item in dispatch.get("lineitems", []):
         for key in lineitems_attributes.keys():
             if key in item and item[key] is not None:
@@ -234,14 +255,17 @@ def reformat_dispatch(dispatch: dict) -> dict:
     if "qty" in reformatted:
         try:
             # Convert each quantity to a float and sum them up
-            total_tonnage = sum(float(qty.strip()) for qty in reformatted["qty"].split(";") if qty.strip())
+            total_tonnage = sum(
+                float(qty.strip())
+                for qty in reformatted["qty"].split(";")
+                if qty.strip()
+            )
         except ValueError:
             # In case of any non-numeric values, set total tonnage to 0 or handle as needed
             total_tonnage = 0
         reformatted["Material Tonnage"] = total_tonnage
 
     return reformatted
-
 
 
 def summarize_results(results: list):
@@ -290,7 +314,6 @@ def summarize_results(results: list):
 
         # Separator for different projects
         print("\n" + "-" * 120 + "\n")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:

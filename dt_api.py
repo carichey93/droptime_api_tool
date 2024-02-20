@@ -1,11 +1,15 @@
 import sys
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt, datetime, timedelta
 from pathlib import Path
 
+import pandas as pd
 import requests
 import yaml
 from requests.exceptions import RequestException
+from requests.models import PreparedRequest
 from ruamel.yaml import YAML
+
+import helper_functions.helper
 
 """
 Droptime API Interaction Module
@@ -20,6 +24,10 @@ The module is intended to be used as a standalone script or imported into larger
 the Droptime API. It expects command-line arguments specifying the start and end dates for dispatch data retrieval and 
 the path to the configuration file when run as a script. Ensure the configuration file adheres to the required schema 
 and includes all necessary authentication and identification fields.
+
+***********************************************************************************************************************
+NOTE: An extra day has to be added to the end date to function properly
+***********************************************************************************************************************
 
 Example command:
 python droptime_api_module.py 2021-01-01 2021-01-31 path/to/config.yml
@@ -36,6 +44,27 @@ REQUIRED_FIELDS = [
     "SessionPassword",
     "UserName",
 ]
+
+
+def get_data(start_date: str, end_date: str, config_file: str) -> list:
+    """
+    Fetch and format dispatch data for a specified date range using the configuration from the given file.
+
+    Parameters:
+    - start_date: Start date for the dispatch data request.
+    - end_date: End date for the dispatch data request.
+    - config_file: Path to the YAML configuration file.
+
+    Returns:
+    - A list of dictionaries containing formatted dispatch data.
+    """
+    # Apply single day offset required for API
+    end_date = datetime.strptime(end_date, "%m-%d-%Y")
+    end_date += timedelta(days=1)
+    end_date = datetime.strftime(end_date, "%m-%d-%Y")
+
+    data = make_api_call("getDispatchInfo", start_date, end_date, config_file)
+    return [reformat_dispatch(dispatch) for dispatch in data.get("Items", [])]
 
 
 def load_config(config_file: str) -> dict:
@@ -143,9 +172,16 @@ def make_api_call(
         )
 
     try:
+        # Prepare the request to print the full URL
+        req = PreparedRequest()
+        req.prepare_url(BASE_URL, api_params)
+        print(f"Making API call to: {req.url}")  # Print the full URL
+
         response = requests.get(BASE_URL, params=api_params)
         response.raise_for_status()  # Ensure the API call was successful
         data = response.json()
+        # Print the response data for debugging (optional)
+        # print(data)
 
         # Check for an error code in the response
         if data.get("ErrorCode") == "1" and attempt <= 2:  # Prevents infinite recursion
@@ -159,24 +195,7 @@ def make_api_call(
         return data
     except RequestException as e:
         print(f"API call failed due to connection error: {e}")
-        # In a real scenario, you might want to handle retries or log the error appropriately
         raise
-
-
-def get_data(start_date: str, end_date: str, config_file: str) -> list:
-    """
-    Fetch and format dispatch data for a specified date range using the configuration from the given file.
-
-    Parameters:
-    - start_date: Start date for the dispatch data request.
-    - end_date: End date for the dispatch data request.
-    - config_file: Path to the YAML configuration file.
-
-    Returns:
-    - A list of dictionaries containing formatted dispatch data.
-    """
-    data = make_api_call("getDispatchInfo", start_date, end_date, config_file)
-    return [reformat_dispatch(dispatch) for dispatch in data.get("Items", [])]
 
 
 def reformat_dispatch(dispatch: dict) -> dict:
@@ -275,6 +294,7 @@ def summarize_results(results: list):
     Parameters:
     - results: A list of dictionaries containing dispatch data.
     """
+
     for entry in results:
         # Print Project
         print(
@@ -315,11 +335,21 @@ def summarize_results(results: list):
         # Separator for different projects
         print("\n" + "-" * 120 + "\n")
 
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: script.py start_date end_date config_file_path")
-        sys.exit(1)
 
-    start, end, input_config = sys.argv[1:4]
-    schedule = get_data(start, end, input_config)
-    summarize_results(schedule)
+if __name__ == "__main__":
+    # Check to see if ran with command line inputs, otherwise, use the predefined inputs
+    try:
+        start, end, input_config = sys.argv[1:4]
+        schedule = get_data(start, end, input_config)
+        summarize_results(schedule)
+    except:
+        # Use this section to specify arguments without relying on command line inputs
+        print("No command line arguments passed - running with defaults")
+        input_config = Path(__file__).parent.parent / "config" / "cad_config.yaml"
+        start = dt(2023, 9, 1).strftime("%m-%d-%Y")
+        end = dt(2023, 9, 4).strftime("%m-%d-%Y")
+        schedule = get_data(start, end, input_config)
+
+        # Call to print an example of an organized summary
+        print("Summary")
+        summarize_results(schedule)

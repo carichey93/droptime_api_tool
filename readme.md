@@ -91,7 +91,11 @@ Fetches a new session from the Droptime API using the provided configuration.
 
 #### Example Usage
 
-```config = load_config("path/to/config.yml") session_info = fetch_new_session(config) print(session_info)```
+```
+config = load_config("path/to/config.yml") 
+session_info = fetch_new_session(config)
+print(session_info)
+```
 
 ### 2\. get\_or\_refresh\_session()
 
@@ -110,7 +114,8 @@ Retrieves the current session details from the configuration file or fetches a n
 #### Example Usage
 
 ```
-session_config = get_or_refresh_session("path/to/config.yml") print(session_config)
+session_config = get_or_refresh_session("path/to/config.yml")
+print(session_config)
 ```
 
 ### 3\. make\_api\_call()
@@ -133,7 +138,8 @@ Makes a generic API call to the Droptime API with specified method and parameter
 #### Example Usage
 
 ```
-api_response = make_api_call("getDispatchInfo", session_config, "2023-01-01", "2023-01-31") print(api_response)
+api_response = make_api_call("getDispatchInfo", session_config, "2023-01-01", "2023-01-31")
+print(api_response)
 ```
 
 ### 4\. reformat\_dispatch()
